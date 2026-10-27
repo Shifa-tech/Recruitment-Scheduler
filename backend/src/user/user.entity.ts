@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column ,OneToMany } from 'typeorm';
+import { Availability } from '../availability/availability.entity.js';
 
 export enum Role {
   CANDIDATE = 'CANDIDATE',
@@ -32,5 +33,8 @@ export class User {
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
+
+  @OneToMany(() => Availability, (availability) => availability.interviewer)
+  availabilities: Availability[];
 
 }
