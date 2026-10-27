@@ -2,6 +2,7 @@
 /dist
 /node_modules
 /build
+/test
 
 # TypeScript build cache
 *.tsbuildinfo
@@ -59,3 +60,5 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 firebase-service-account.json
+
+test/sdk.js

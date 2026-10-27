@@ -18,7 +18,7 @@ import { AuthModule } from './auth/auth.module.js';
     }),
     UserModule,
     FirebaseModule,
-    AuthModule
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

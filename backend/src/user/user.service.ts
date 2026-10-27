@@ -27,4 +27,7 @@ export class UserService {
 
     return user;
   }
+   async findByFirebaseUid(firebaseUid: string) {
+    return this.userRepository.findOne({ where: { firebaseUid } });
+  }
 }
