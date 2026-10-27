@@ -10,15 +10,15 @@ export enum Role {
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+  
+  @Column({ unique: true })
+  firebaseUid: string;
 
   @Column()
   name: string;
 
   @Column({ unique: true })
   email: string;
-
-  @Column()
-  passwordHash: string;
 
   @Column({
     type: 'enum',
