@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column ,OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column ,OneToMany , type Relation } from 'typeorm';
 import { Availability } from '../availability/availability.entity.js';
 
 export enum Role {
@@ -35,6 +35,6 @@ export class User {
   createdAt: Date;
 
   @OneToMany(() => Availability, (availability) => availability.interviewer)
-  availabilities: Availability[];
+  availabilities: Relation<Availability[]>;
 
 }

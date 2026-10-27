@@ -32,9 +32,9 @@ export class AvailabilityController {
     );
   }
 
-  @Get('me')
-  async getMyAvailability(@Req() req: any) {
-    const user = await this.userService.findByFirebaseUid(req.user.uid);
-    return this.availabilityService.getAvailabilityForUser(user.id);
-  }
+  // @Get('me')
+  // async getMyAvailability(@Req() req: any) {
+  //   const user = await this.userService.findByFirebaseUid(req.user.uid);
+  //   return this.availabilityService.getAvailabilityForUser(user.id);
+  // }
 }

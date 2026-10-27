@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne ,type Relation} from 'typeorm';
 import { User } from '../user/user.entity.js';
 
 @Entity('availabilities')
@@ -14,5 +14,5 @@ export class Availability {
 
   // This links the availability block to the specific interviewer
   @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
-  interviewer: User;
+  interviewer: Relation<User>;
 }
