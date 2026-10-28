@@ -1,334 +1,228 @@
 
+"use client";
+
 import Link from "next/link";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 
 const stats = [
   {
-    label: "Today's Interviews",
+    label: "Assigned Interviews",
+    value: "08",
+    description: "Total interviews assigned",
+  },
+  {
+    label: "Upcoming Interviews",
     value: "03",
-    icon: "◷",
-    note: "Your schedule for today",
+    description: "Scheduled for the future",
   },
   {
     label: "Pending Evaluations",
     value: "02",
-    icon: "✧",
-    note: "Awaiting your judgement",
-  },
-  {
-    label: "Completed Interviews",
-    value: "12",
-    icon: "♜",
-    note: "Across all assigned rounds",
+    description: "Evaluations to complete",
   },
 ];
 
-const schedule = [
+const upcomingInterviews = [
   {
-    id: "INT-001",
+    id: 1,
     candidate: "Candidate A",
-    round: "Coding Round",
-    date: "28 October 2026",
-    time: "10:00 AM – 11:00 AM",
-    room: "Sanctum · Room 01",
-    status: "Upcoming",
+    registrationNumber: "2023CS101",
+    round: "Technical Interview",
+    date: "30 October 2026",
+    time: "10:00 AM – 10:45 AM",
+    room: "Room 101",
+    status: "UPCOMING",
   },
   {
-    id: "INT-002",
+    id: 2,
     candidate: "Candidate B",
-    round: "Technical Round",
-    date: "28 October 2026",
-    time: "11:30 AM – 12:15 PM",
-    room: "Sanctum · Room 02",
-    status: "Upcoming",
-  },
-  {
-    id: "INT-003",
-    candidate: "Candidate C",
-    round: "Technical Round",
-    date: "28 October 2026",
-    time: "02:00 PM – 02:45 PM",
-    room: "Sanctum · Room 01",
-    status: "Upcoming",
-  },
-];
-
-const pendingEvaluations = [
-  {
-    candidate: "Candidate D",
+    registrationNumber: "2023CS115",
     round: "Coding Round",
-    date: "27 October 2026",
-    id: "EVAL-001",
+    date: "31 October 2026",
+    time: "11:00 AM – 11:45 AM",
+    room: "Room 102",
+    status: "UPCOMING",
   },
   {
-    candidate: "Candidate E",
-    round: "Technical Round",
-    date: "27 October 2026",
-    id: "EVAL-002",
+    id: 3,
+    candidate: "Candidate C",
+    registrationNumber: "2023IT042",
+    round: "HR Interview",
+    date: "2 November 2026",
+    time: "02:00 PM – 02:30 PM",
+    room: "Room 103",
+    status: "UPCOMING",
   },
 ];
 
-export default function InterviewerDashboard() {
+const quickActions = [
+  {
+    title: "My Interviews",
+    description: "View your assigned interview schedule and candidate details.",
+    href: "/interviewer/interviews",
+    icon: "▦",
+  },
+  {
+    title: "Manage Availability",
+    description: "Set the dates and times when you are available.",
+    href: "/interviewer/availability",
+    icon: "◷",
+  },
+  {
+    title: "Evaluate Candidates",
+    description: "Submit scores, feedback, and interview outcomes.",
+    href: "/interviewer/evaluations",
+    icon: "✦",
+  },
+];
+
+export default function InterviewerDashboardPage() {
   return (
     <DashboardLayout role="Interviewer">
-      {/* Welcome banner */}
-      <section className="relative overflow-hidden border border-[#D5AE65]/30
-        bg-[#211F1A] p-6 text-[#F0E5CE] sm:p-9">
-        <div className="pointer-events-none absolute -right-10 -top-20
-          h-64 w-64 rounded-full border border-[#D5AE65]/15" />
-        <div className="pointer-events-none absolute -right-2 -top-12
-          h-48 w-48 rounded-full border border-[#D5AE65]/15" />
-
-        <div className="relative max-w-2xl">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-[#D5AE65]">
-            ✧ The observer's chamber
-          </p>
-
-          <h1 className="mt-4 font-serif text-3xl leading-tight sm:text-5xl">
-            Welcome, Keeper of Knowledge.
-          </h1>
-
-          <p className="mt-4 max-w-xl text-sm leading-7 text-[#B9B09F]">
-            Every interview reveals potential. Review your assignments,
-            manage your availability and deliver thoughtful, consistent
-            evaluations to guide each candidate's journey.
-          </p>
-
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link
-              href="/interviewer/schedule"
-              className="bg-[#D5AE65] px-5 py-3 text-sm font-semibold
-                text-[#171613] transition hover:bg-[#E8CC91]"
-            >
-              View My Schedule →
-            </Link>
-
-            <Link
-              href="/interviewer/availability"
-              className="border border-[#D5AE65]/40 px-5 py-3 text-sm
-                transition hover:border-[#D5AE65] hover:text-[#D5AE65]"
-            >
-              Manage Availability
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Statistics */}
-      <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {stats.map((stat) => (
-          <article
-            key={stat.label}
-            className="border border-[#D5AE65]/25 bg-[#FFFAF0] p-5
-              transition hover:border-[#9D3F2A]/40"
-          >
-            <div className="flex items-start justify-between">
-              <p className="text-sm text-[#756651]">{stat.label}</p>
-              <span className="text-2xl text-[#9D3F2A]">{stat.icon}</span>
-            </div>
-
-            <p className="mt-4 font-serif text-4xl text-[#29241D]">
-              {stat.value}
+      <div className="min-h-screen bg-[#171613] px-4 py-8 text-[#F0E5CE] sm:px-8">
+        <div className="mx-auto max-w-7xl">
+          {/* Header */}
+          <div className="mb-8">
+            <p className="mb-2 text-xs uppercase tracking-[0.3em] text-[#D5AE65]">
+              The Ancient One&apos;s Trials
             </p>
 
-            <p className="mt-3 text-xs text-[#8B7D68]">{stat.note}</p>
-          </article>
-        ))}
-      </section>
+            <h1 className="text-3xl font-semibold sm:text-4xl">
+              Interviewer Dashboard
+            </h1>
 
-      {/* Today's schedule */}
-      <section className="mt-10">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.25em] text-[#9D3F2A]">
-              The day's proceedings
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-[#B9B09F]">
+              Review your interview schedule, manage your availability,
+              and complete candidate evaluations.
             </p>
-            <h2 className="mt-2 font-serif text-2xl sm:text-3xl">
-              Today&apos;s Interviews
-            </h2>
           </div>
 
-          <Link
-            href="/interviewer/schedule"
-            className="text-xs text-[#9D3F2A] hover:underline"
-          >
-            Full schedule →
-          </Link>
-        </div>
-
-        <div className="space-y-4">
-          {schedule.map((interview) => (
-            <article
-              key={interview.id}
-              className="border border-[#D5AE65]/25 bg-[#FFFAF0] p-5
-                transition hover:border-[#9D3F2A]/40 sm:p-6"
-            >
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center
-                sm:justify-between">
-                <div className="flex gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center
-                    justify-center border border-[#D5AE65]/40
-                    bg-[#F0E5CE] font-serif text-xl text-[#9D3F2A]">
-                    ◷
-                  </div>
-
-                  <div>
-                    <p className="text-[10px] tracking-[0.2em] text-[#9D3F2A]">
-                      {interview.id}
-                    </p>
-
-                    <h3 className="mt-1 font-serif text-xl">
-                      {interview.round}
-                    </h3>
-
-                    <p className="mt-1 text-sm text-[#756651]">
-                      {interview.candidate}
-                    </p>
-                  </div>
-                </div>
-
-                <span className="w-fit border border-[#52734D]/30
-                  bg-[#E7EDDF] px-3 py-1 text-xs text-[#46633F]">
-                  {interview.status}
-                </span>
-              </div>
-
-              <div className="mt-5 grid gap-4 border-t border-[#E6D8BE]
-                pt-4 text-sm sm:grid-cols-3">
-                <div>
-                  <p className="text-[10px] tracking-[0.15em] text-[#9A8A73]">
-                    DATE
-                  </p>
-                  <p className="mt-1 text-[#514536]">{interview.date}</p>
-                </div>
-
-                <div>
-                  <p className="text-[10px] tracking-[0.15em] text-[#9A8A73]">
-                    TIME
-                  </p>
-                  <p className="mt-1 text-[#514536]">{interview.time}</p>
-                </div>
-
-                <div>
-                  <p className="text-[10px] tracking-[0.15em] text-[#9A8A73]">
-                    LOCATION
-                  </p>
-                  <p className="mt-1 text-[#514536]">{interview.room}</p>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      {/* Evaluations and availability */}
-      <div className="mt-10 grid gap-8 xl:grid-cols-[1.4fr_1fr]">
-        <section>
-          <div className="mb-5">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-[#9D3F2A]">
-              Awaiting your judgement
-            </p>
-            <h2 className="mt-2 font-serif text-2xl sm:text-3xl">
-              Pending Evaluations
-            </h2>
-          </div>
-
-          <div className="border border-[#D5AE65]/25 bg-[#FFFAF0]">
-            {pendingEvaluations.map((evaluation, index) => (
+          {/* Stats */}
+          <div className="mb-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {stats.map((stat) => (
               <div
-                key={evaluation.id}
-                className={`flex flex-wrap items-center justify-between
-                  gap-4 p-5 ${
-                    index !== pendingEvaluations.length - 1
-                      ? "border-b border-[#E6D8BE]"
-                      : ""
-                  }`}
+                key={stat.label}
+                className="rounded-2xl border border-[#D5AE65]/20 bg-[#22201B] p-5 sm:p-6"
               >
-                <div>
-                  <h3 className="text-sm font-medium">
-                    {evaluation.candidate}
-                  </h3>
-                  <p className="mt-1 text-sm text-[#756651]">
-                    {evaluation.round}
-                  </p>
-                  <p className="mt-2 text-xs text-[#9A8A73]">
-                    Interviewed on {evaluation.date}
-                  </p>
-                </div>
+                <p className="text-sm text-[#B9B09F]">{stat.label}</p>
 
-                <Link
-                  href="/interviewer/evaluations"
-                  className="border border-[#9D3F2A]/40 px-4 py-2
-                    text-xs text-[#9D3F2A] transition
-                    hover:bg-[#9D3F2A] hover:text-white"
-                >
-                  Evaluate →
-                </Link>
+                <p className="mt-3 text-3xl font-semibold text-[#D5AE65]">
+                  {stat.value}
+                </p>
+
+                <p className="mt-2 text-xs text-[#B9B09F]/70">
+                  {stat.description}
+                </p>
               </div>
             ))}
           </div>
-        </section>
 
-        <aside className="space-y-6">
-          <section className="border border-[#D5AE65]/25 bg-[#FFFAF0] p-6">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-[#9D3F2A]">
-              Your availability
-            </p>
-
-            <h2 className="mt-2 font-serif text-2xl">
-              Set Your Boundaries
-            </h2>
-
-            <p className="mt-3 text-sm leading-7 text-[#756651]">
-              Keep your available hours up to date so the scheduling engine
-              can assign interviews without conflicts.
-            </p>
-
-            <div className="mt-5 flex items-center gap-3 border
-              border-[#E6D8BE] p-4">
-              <span className="text-2xl text-[#9D3F2A]">✧</span>
-              <div>
-                <p className="text-sm font-medium">Availability settings</p>
-                <p className="mt-1 text-xs text-[#8B7D68]">
-                  Manage your preferred interview windows
-                </p>
-              </div>
+          {/* Quick Actions */}
+          <section className="mb-10">
+            <div className="mb-5">
+              <h2 className="text-xl font-semibold">Quick Actions</h2>
+              <p className="mt-2 text-sm text-[#B9B09F]">
+                Access your main interviewer tools.
+              </p>
             </div>
 
-            <Link
-              href="/interviewer/availability"
-              className="mt-5 block bg-[#211F1A] px-5 py-3 text-center
-                text-sm text-[#D5AE65] transition hover:bg-[#302B22]"
-            >
-              Update Availability →
-            </Link>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {quickActions.map((action) => (
+                <Link
+                  key={action.title}
+                  href={action.href}
+                  className="group rounded-2xl border border-[#D5AE65]/20 bg-[#22201B] p-6 transition hover:-translate-y-1 hover:border-[#D5AE65]/50"
+                >
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl border border-[#D5AE65]/20 bg-[#30291D] text-2xl text-[#D5AE65]">
+                    {action.icon}
+                  </div>
+
+                  <h3 className="text-lg font-semibold transition group-hover:text-[#D5AE65]">
+                    {action.title}
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-[#B9B09F]">
+                    {action.description}
+                  </p>
+
+                  <p className="mt-5 text-sm font-medium text-[#D5AE65]">
+                    Open section →
+                  </p>
+                </Link>
+              ))}
+            </div>
           </section>
 
-          <section className="border border-[#D5AE65]/25 bg-[#211F1A]
-            p-6 text-[#F0E5CE]">
-            <span className="text-2xl text-[#D5AE65]">✧</span>
-            <h2 className="mt-3 font-serif text-xl">
-              The Art of Evaluation
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-[#B9B09F]">
-              Assess candidates against the same criteria, provide
-              constructive feedback and record your decisions promptly.
-            </p>
-            <Link
-              href="/interviewer/evaluations"
-              className="mt-5 inline-block text-sm text-[#D5AE65]
-                hover:underline"
-            >
-              Review evaluations →
-            </Link>
+          {/* Upcoming Interviews */}
+          <section>
+            <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+              <div>
+                <h2 className="text-xl font-semibold">Upcoming Interviews</h2>
+                <p className="mt-2 text-sm text-[#B9B09F]">
+                  A preview of your assigned schedule.
+                </p>
+              </div>
+
+              <Link
+                href="/interviewer/interviews"
+                className="text-sm font-medium text-[#D5AE65] transition hover:text-[#F0E5CE]"
+              >
+                View all interviews →
+              </Link>
+            </div>
+
+            <div className="space-y-4">
+              {upcomingInterviews.map((interview) => (
+                <div
+                  key={interview.id}
+                  className="rounded-2xl border border-[#D5AE65]/20 bg-[#22201B] p-5 sm:p-6"
+                >
+                  <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-[#D5AE65]">
+                        {interview.round}
+                      </p>
+
+                      <h3 className="mt-2 text-lg font-semibold">
+                        {interview.candidate}
+                      </h3>
+
+                      <p className="mt-1 text-sm text-[#B9B09F]">
+                        Registration No: {interview.registrationNumber}
+                      </p>
+                    </div>
+
+                    <span className="w-fit rounded-full border border-[#D5AE65]/30 bg-[#30291D] px-3 py-1 text-xs text-[#D5AE65]">
+                      Upcoming
+                    </span>
+                  </div>
+
+                  <div className="mt-5 grid gap-4 border-t border-[#D5AE65]/10 pt-5 sm:grid-cols-3">
+                    <div>
+                      <p className="text-xs text-[#B9B09F]">Date</p>
+                      <p className="mt-1 text-sm">{interview.date}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-[#B9B09F]">Time</p>
+                      <p className="mt-1 text-sm">{interview.time}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-[#B9B09F]">Location</p>
+                      <p className="mt-1 text-sm">{interview.room}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </section>
-        </aside>
+
+          <p className="mt-10 text-center text-xs text-[#B9B09F]/60">
+            Prepare with purpose. Evaluate with fairness.
+          </p>
+        </div>
       </div>
-
-      <footer className="mt-12 border-t border-[#D5AE65]/30 pt-5
-        text-xs text-[#8B7D68]">
-        THE ANCIENT ONE&apos;S TRIALS · Judge with wisdom and fairness.
-      </footer>
     </DashboardLayout>
   );
 }

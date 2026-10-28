@@ -16,6 +16,7 @@ const navigation = {
   Candidate: [
     { label: "Overview", href: "/candidate", icon: "⌂" },
     { label: "My Interviews", href: "/candidate/interviews", icon: "◷" },
+      { label: "Apply for Interview", href: "/candidate/apply", icon: "✦" },
     { label: "Available Slots", href: "/candidate/slots", icon: "✧" },
     { label: "My Results", href: "/candidate/results", icon: "♜" },
   ],
