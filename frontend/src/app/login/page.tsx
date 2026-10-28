@@ -3,15 +3,68 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
+import { auth, googleProvider } from "../lib/firebase";
+import { syncUserWithBackend } from "../lib/syncUser";
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function goToDashboard(role: string) {
+    if (role === "COORDINATOR") {
+      router.push("/coordinator");
+    } else if (role === "INTERVIEWER") {
+      router.push("/interviewer");
+    } else {
+      router.push("/candidate");
+    }
+  }
+
+  async function finishLogin() {
+    const user = await syncUserWithBackend();
+    goToDashboard(user.role ?? "CANDIDATE");
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setMessage("Login UI is ready. Authentication will be connected to NestJS next.");
+    setMessage("");
+    setLoading(true);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      await finishLogin();
+    } catch (error: unknown) {
+      setMessage(
+        error instanceof Error ? error.message : "Login failed."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGoogleLogin() {
+    setMessage("");
+    setLoading(true);
+
+    try {
+      await signInWithPopup(auth, googleProvider);
+      await finishLogin();
+    } catch (error: unknown) {
+      setMessage(
+        error instanceof Error ? error.message : "Google login failed."
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -92,15 +145,33 @@ export default function LoginPage() {
               placeholder:text-[#777064] focus:border-[#D5AE65]"
           />
 
-          <button type="submit"
+          <button
+            type="submit"
+            disabled={loading}
             className="mt-7 w-full bg-[#D5AE65] px-5 py-3.5
               text-sm font-semibold text-[#171613] transition
-              hover:bg-[#E8CC91]">
-            Enter the Order <span className="ml-2">→</span>
+              hover:bg-[#E8CC91] disabled:cursor-not-allowed disabled:opacity-60">
+            {loading ? "Entering the Sanctum..." : "Enter the Order →"}
+          </button>
+
+          <div className="my-6 flex items-center gap-4">
+            <div className="h-px flex-1 bg-[#D5AE65]/20" />
+            <span className="text-xs text-[#938A79]">OR</span>
+            <div className="h-px flex-1 bg-[#D5AE65]/20" />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="w-full border border-[#D5AE65]/40 px-5 py-3.5
+              text-sm transition hover:border-[#D5AE65]
+              hover:text-[#D5AE65] disabled:opacity-60">
+            Continue with Google
           </button>
 
           {message && (
-            <p role="status" className="mt-4 text-sm leading-6 text-[#D5AE65]">
+            <p role="alert" className="mt-4 break-words text-sm leading-6 text-red-300">
               {message}
             </p>
           )}
