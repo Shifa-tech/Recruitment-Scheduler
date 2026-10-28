@@ -7,7 +7,6 @@ import { UserModule } from "./user/user.module.js";
 import { FirebaseModule } from './firebase/firebase.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { AvailabilityModule } from './availability/availability.module.js';
-import { RoomModule } from './room/room.module.js';
 import { InterviewModule } from './interview/interview.module.js';
 
 @Module({
@@ -23,7 +22,6 @@ import { InterviewModule } from './interview/interview.module.js';
     FirebaseModule,
     AuthModule,
     AvailabilityModule,
-    RoomModule,
     InterviewModule,
   ],
   controllers: [AppController],

@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import type { Relation } from 'typeorm';
-import { Interview } from "./interview.entity.js";
+import { Interview } from './interview.entity.js';
 
 export enum ResultOutcome {
   PASS = 'PASS',

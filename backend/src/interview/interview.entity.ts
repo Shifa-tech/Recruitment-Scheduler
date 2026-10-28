@@ -1,8 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne , OneToMany} from 'typeorm';
 import type { Relation } from 'typeorm';
 import { User } from '../user/user.entity.js';
 import { Room } from '../room/room.entity.js';
-import { Result } from './result.entity.js';
+import { Result } from "./result.entity.js";
+import { ProposedSlot } from './proposed-slot.entity.js'; 
 
 export enum InterviewRound {
   CODING = 'CODING',
@@ -48,4 +49,7 @@ export class Interview {
 
   @OneToOne(() => Result, (result) => result.interview, { nullable: true })
   result: Relation<Result> | null;
+
+  @OneToMany(() => ProposedSlot, (slot) => slot.interview)
+  proposedSlots: Relation<ProposedSlot[]>;
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Interview, InterviewRound, InterviewStatus } from './interview.entity.js';
@@ -27,7 +27,7 @@ export class InterviewService {
   async getInterviewsForCandidate(candidateId: string) {
     return this.interviewRepo.find({
       where: { candidate: { id: candidateId } },
-      relations: { interviewer: true, room: true }, //  Fetches the interviewer's details!
+      relations: { interviewer: true, room: true }, // 👈 Fetches the interviewer's details!
       order: { round: 'ASC' },
     });
   }

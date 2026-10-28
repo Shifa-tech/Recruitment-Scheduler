@@ -34,5 +34,4 @@ export class UserService {
   async findById(id: string) {
     return this.userRepository.findOne({ where: { id } });
   }
-
 }

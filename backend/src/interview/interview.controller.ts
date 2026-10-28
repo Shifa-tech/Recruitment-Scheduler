@@ -4,7 +4,7 @@ import { Role } from '../user/user.entity.js';
 import { InterviewRound } from './interview.entity.js';
 import { UserService } from '../user/user.service.js';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.gaurd.js';
-import { Roles, RolesGuard } from '../auth/roles.gaurd.js';
+import { RolesGuard , Roles } from '../auth/roles.gaurd.js';
 
 @Controller('interviews')
 @UseGuards(FirebaseAuthGuard)
