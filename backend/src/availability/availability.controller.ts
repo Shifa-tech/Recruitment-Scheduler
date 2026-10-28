@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards, Req, ForbiddenException } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Req, ForbiddenException ,NotFoundException} from '@nestjs/common';
 import { AvailabilityService } from './availability.service.js';
 import { Role } from '../user/user.entity.js';
 import { UserService } from '../user/user.service.js';
@@ -32,9 +32,12 @@ export class AvailabilityController {
     );
   }
 
-  // @Get('me')
-  // async getMyAvailability(@Req() req: any) {
-  //   const user = await this.userService.findByFirebaseUid(req.user.uid);
-  //   return this.availabilityService.getAvailabilityForUser(user.id);
-  // }
+  @Get('me')
+  async getMyAvailability(@Req() req: any) {
+    const user = await this.userService.findByFirebaseUid(req.user.uid);
+    if (!user) {
+      throw new NotFoundException('User not found in database. Please sync first.');
+    }
+    return this.availabilityService.getAvailabilityForUser(user.id);
+  }
 }

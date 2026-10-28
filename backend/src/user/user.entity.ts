@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column ,OneToMany , type Relation } from 'typeorm';
 import { Availability } from '../availability/availability.entity.js';
+import { InterviewRound } from '../interview/interview.entity.js';
 
 export enum Role {
   CANDIDATE = 'CANDIDATE',
@@ -36,5 +37,8 @@ export class User {
 
   @OneToMany(() => Availability, (availability) => availability.interviewer)
   availabilities: Relation<Availability[]>;
+
+  @Column({ type: 'enum', enum: InterviewRound, nullable: true })
+  currentRound: InterviewRound | null;
 
 }
