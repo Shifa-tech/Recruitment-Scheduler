@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Interview, InterviewRound, InterviewStatus } from './interview.entity.js';
@@ -88,9 +88,10 @@ export class InterviewService {
     return this.interviewRepo.save(interview);
   }
 
-  async cancelInterview(interviewId: string) {
+  async cancelInterview(interviewId: string , interviewerId : string) {
     const interview = await this.interviewRepo.findOne({
       where: { id: interviewId },
+      relations : {interviewer : true}
     });
     if (!interview) throw new NotFoundException('Interview not found');
 
