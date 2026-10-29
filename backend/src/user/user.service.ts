@@ -34,4 +34,10 @@ export class UserService {
   async findById(id: string) {
     return this.userRepository.findOne({ where: { id } });
   }
+
+  async findAllInterviewers() {
+    return this.userRepository.find({
+      where: { role: Role.INTERVIEWER },
+    });
+  }
 }

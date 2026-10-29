@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller.js';
 import { UserModule } from '../user/user.module.js';
-import { FirebaseAuthGuard } from "./firebase-auth.gaurd.js";
-import { Roles, RolesGuard } from './roles.gaurd.js';
+import { FirebaseAuthGuard } from "./firebase-auth.guard.js";
+import { Roles, RolesGuard } from './roles.guard.js';
 
 @Module({
   imports: [UserModule],

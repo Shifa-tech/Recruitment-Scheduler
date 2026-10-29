@@ -1,14 +1,21 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Interview, InterviewRound, InterviewStatus } from './interview.entity.js';
 import { User } from '../user/user.entity.js';
+import {SchedulingService } from './scheduling.service.js';
+import { Room } from '../room/room.entity.js';
+import { UserService } from '../user/user.service.js';
 
 @Injectable()
 export class InterviewService {
   constructor(
     @InjectRepository(Interview)
     private interviewRepo: Repository<Interview>,
+    @InjectRepository(Room) //  We will need this later to save the Room
+    private roomRepo: Repository<Room>,
+    private schedulingService: SchedulingService,
+    private userService: UserService,
   ) {}
 
   // Create a new interview slot
@@ -30,5 +37,78 @@ export class InterviewService {
       relations: { interviewer: true, room: true }, // 👈 Fetches the interviewer's details!
       order: { round: 'ASC' },
     });
+  }
+  async processCandidateForm(requiredSkill: string, round: InterviewRound) {
+    // Just pass the request to the C++ bridge
+    return this.schedulingService.findMatchesForCandidate(requiredSkill, round);
+  }
+
+  async confirmSlot(
+    candidateId: string,
+    interviewerId: string,
+    startTime: string,
+    endTime: string,
+    round: InterviewRound,
+  ) {
+    const candidate = await this.userService.findById(candidateId);
+    const interviewer = await this.userService.findById(interviewerId);
+
+    if (!candidate || !interviewer) {
+      throw new NotFoundException('Candidate or Interviewer not found');
+    }
+
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+
+    const room = await this.roomRepo.findOne({ where: {} }); 
+    if (!room) throw new NotFoundException('No rooms exist in the system');
+
+    const conflict = await this.interviewRepo.findOne({
+      where: {
+        interviewer: { id: interviewerId },
+        startTime: start,
+        status: InterviewStatus.SCHEDULED,
+      },
+    });
+
+    if (conflict) {
+      throw new BadRequestException('Interviewer is already booked for this slot');
+    }
+
+    const interview = this.interviewRepo.create({
+      candidate,
+      interviewer,
+      room,
+      round,
+      startTime: start,
+      endTime: end,
+      status: InterviewStatus.SCHEDULED,
+    });
+
+    return this.interviewRepo.save(interview);
+  }
+
+  async cancelInterview(interviewId: string) {
+    const interview = await this.interviewRepo.findOne({
+      where: { id: interviewId },
+    });
+    if (!interview) throw new NotFoundException('Interview not found');
+
+    if (interview.interviewer.id !== interviewerId) {
+      throw new ForbiddenException('You can only cancel your own interviews');
+    }
+    // 1. Change status to CANCELLED
+    interview.status = InterviewStatus.CANCELLED;
+    await this.interviewRepo.save(interview);
+
+    // 2. The "Ripple Effect" logic:
+    // In a real app, you would trigger an email here to the candidate 
+    // saying "Your interview was cancelled, please book a new slot."
+    
+    return {
+      success: true,
+      message: 'Interview cancelled. Candidate notified to reschedule.',
+      interview,
+    };
   }
 }

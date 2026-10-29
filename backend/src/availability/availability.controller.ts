@@ -2,8 +2,8 @@ import { Controller, Post, Body, Get, UseGuards, Req, ForbiddenException ,NotFou
 import { AvailabilityService } from './availability.service.js';
 import { Role } from '../user/user.entity.js';
 import { UserService } from '../user/user.service.js';
-import { FirebaseAuthGuard } from '../auth/firebase-auth.gaurd.js';
-import { Roles , RolesGuard } from '../auth/roles.gaurd.js';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard.js';
+import { Roles , RolesGuard } from '../auth/roles.guard.js';
 
 @Controller('availability')
 @UseGuards(FirebaseAuthGuard) // Every route here requires login
