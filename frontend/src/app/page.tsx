@@ -102,13 +102,6 @@ export default function HomePage() {
             </p>
 
             <div className="mt-10 flex flex-wrap gap-4">
-              <Link
-                href="/login"
-                className="bg-[#D5AE65] px-7 py-4 text-sm font-semibold
-                  text-[#171613] transition hover:bg-[#E8CC91]"
-              >
-                Begin Your Trial <span className="ml-3">→</span>
-              </Link>
 
               <a
                 href="#trials"
@@ -226,14 +219,7 @@ export default function HomePage() {
             intelligent recruitment system. Resolve schedule conflicts,
             coordinate interview panels and make every round count.
           </p>
-          <Link
-            href="/login"
-            className="mt-8 inline-flex border border-[#D5AE65]
-              px-7 py-3 text-sm text-[#D5AE65] transition
-              hover:bg-[#D5AE65] hover:text-[#171613]"
-          >
-            Enter the Sanctum →
-          </Link>
+          
         </div>
       </section>
 

@@ -37,6 +37,36 @@ export default function CandidateDashboard() {
   return (
     <DashboardLayout role="Candidate">
       {/* Welcome */}
+      
+{/* Apply for an Interview */}
+<div className="mb-8 border border-[#D5AE65]/40 bg-[#211F1A] p-6 sm:p-8">
+  <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+    <div>
+      <p className="text-xs uppercase tracking-[0.25em] text-[#D5AE65]">
+        Your next opportunity
+      </p>
+
+      <h2 className="mt-3 font-serif text-2xl text-[#F0E5CE]">
+        Ready to Begin Your Trial?
+      </h2>
+
+      <p className="mt-2 max-w-xl text-sm leading-6 text-[#B9B09F]">
+        Submit your application, share your qualifications, and take
+        the first step in your recruitment journey.
+      </p>
+    </div>
+
+    <Link
+      href="/candidate/apply"
+      className="inline-flex shrink-0 items-center justify-center
+        bg-[#D5AE65] px-6 py-3 text-sm font-semibold text-[#171613]
+        transition hover:bg-[#E8CC91]"
+    >
+      Apply for an Interview →
+    </Link>
+  </div>
+</div>
+
       <section className="relative overflow-hidden border border-[#D5AE65]/30
         bg-[#211F1A] p-6 text-[#F0E5CE] sm:p-9">
         <div className="pointer-events-none absolute -right-12 -top-20
@@ -87,6 +117,7 @@ export default function CandidateDashboard() {
         ))}
       </section>
 
+    
       {/* Main content grid */}
       <div className="mt-10 grid gap-8 xl:grid-cols-[1.5fr_1fr]">
         {/* Interviews */}
