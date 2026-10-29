@@ -51,19 +51,6 @@ export class InterviewController {
     return this.interviewService.getInterviewsForCandidate(user!.id);
   }
 
-  @Post('request')
-  @UseGuards(RolesGuard)
-  @Roles(Role.CANDIDATE)
-  async requestInterview(
-    @Req() req: any,
-    @Body('requiredSkill') requiredSkill: string,
-    @Body('round') round: InterviewRound,
-  ) {
-    const candidate = await this.userService.findByFirebaseUid(req.user.uid);
-    if (!candidate) throw new Error('Candidate not found');
-    return this.interviewService.processCandidateForm(requiredSkill, round);
-  }
-
   @Post('confirm')
   @UseGuards(RolesGuard)
   @Roles(Role.CANDIDATE)
@@ -84,5 +71,35 @@ export class InterviewController {
       endTime,
       round,
     );
+  }
+
+  @Post('apply')
+  @UseGuards(RolesGuard)
+  @Roles(Role.CANDIDATE)
+  async applyForInterview(
+    @Req() req: any,
+    @Body('skills') skills: string[],
+    @Body('round') round: InterviewRound,
+  ) {
+    const candidate = await this.userService.findByFirebaseUid(req.user.uid);
+    if (!candidate) throw new Error('Candidate not found');
+    await this.userService.updateCandidateSkills(candidate.id, skills);
+    return this.interviewService.processCandidateForm(skills, round, candidate.id);
+  }
+
+    // Get all interviews for Coordinator
+  @Get('all')
+  @UseGuards(RolesGuard)
+  @Roles(Role.COORDINATOR)
+  async getAllInterviews() {
+    return this.interviewService.getAllInterviews();
+  }
+
+  // Cancel an interview (Coordinator only)
+  @Patch(':id/coordinator-cancel')
+  @UseGuards(RolesGuard)
+  @Roles(Role.COORDINATOR)
+  async coordinatorCancel(@Param('id') id: string) {
+    return this.interviewService.coordinatorCancelInterview(id);
   }
 }

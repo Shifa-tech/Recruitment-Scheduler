@@ -23,15 +23,14 @@ int main() {
             return 0;
         }
 
-        // 3. Assign Rooms
+        // 3. Assign Rooms (Simplified for now)
         json finalSlots = json::array();
         for (auto& match : matches) {
             string start = match["startTime"];
             string end = match["endTime"];
 
-            // Check if a room is free for this time
             if (isRoomFree(start, end)) {
-                match["room"] = "Room 101"; // Placeholder for now
+                match["room"] = "Room 101"; // Placeholder
                 finalSlots.push_back(match);
             }
         }

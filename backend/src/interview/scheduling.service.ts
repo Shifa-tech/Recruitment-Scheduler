@@ -16,7 +16,8 @@ export class SchedulingService {
   ) {}
 
   // 1. Gather ALL data and send to C++
-  async findMatchesForCandidate(requiredSkill: string, round: string) {
+    // Change the signature to accept an array
+  async findMatchesForCandidate(requiredSkills: string[], round: string) {
     const interviewers = await this.userService.findAllInterviewers();
 
     if (interviewers.length === 0) {
@@ -30,9 +31,8 @@ export class SchedulingService {
       relations: { interviewer: true },
     });
 
-    // 2. Format data for C++ (No filtering here!)
     const cppInput = {
-      requiredSkill,
+      requiredSkills, //  Now an array
       round,
       interviewers: interviewers.map(int => ({
         id: int.id,
@@ -44,37 +44,41 @@ export class SchedulingService {
       }))
     };
 
-    // 3. Call C++ Engine
     return await this.runCppAlgorithm(cppInput);
   }
 
-  private runCppAlgorithm(inputJson: any): Promise<any> {
+    private runCppAlgorithm(inputJson: any): Promise<any> {
     return new Promise((resolve, reject) => {
-      const exePath = path.resolve(process.cwd(), 'cpp_engine', 'scheduler.exe'); 
-      const cppProcess = spawn(exePath);
+      try {
+        const exePath = path.resolve(process.cwd(), 'cpp_engine', 'scheduler.exe'); 
+        const cppProcess = spawn(exePath);
 
-      let outputData = '';
-      let errorData = '';
+        let outputData = '';
+        let errorData = '';
 
-      // Send JSON to C++ stdin
-      cppProcess.stdin.write(JSON.stringify(inputJson));
-      cppProcess.stdin.end();
+        cppProcess.stdin.write(JSON.stringify(inputJson));
+        cppProcess.stdin.end();
 
-      // Listen to C++ stdout
-      cppProcess.stdout.on('data', (data) => { outputData += data.toString(); });
-      cppProcess.stderr.on('data', (data) => { errorData += data.toString(); });
+        cppProcess.stdout.on('data', (data) => { outputData += data.toString(); });
+        cppProcess.stderr.on('data', (data) => { errorData += data.toString(); });
 
-      cppProcess.on('close', (code) => {
-        if (code !== 0) {
-          console.error('C++ Error:', errorData);
-          return reject(new InternalServerErrorException('Algorithm engine failed'));
-        }
-        try {
-          resolve(JSON.parse(outputData));
-        } catch (e) {
-          reject(new InternalServerErrorException('Invalid JSON from C++ engine'));
-        }
-      });
+        cppProcess.on('close', (code) => {
+          if (code !== 0) {
+            console.error('C++ Process Error Output:', errorData);
+            // Instead of rejecting, return a safe JSON error
+            return resolve({ success: false, error: 'CPP_ENGINE_FAILED' });
+          }
+          try {
+            resolve(JSON.parse(outputData));
+          } catch (e) {
+            console.error('Failed to parse C++ output:', outputData);
+            resolve({ success: false, error: 'INVALID_CPP_OUTPUT' });
+          }
+        });
+      } catch (err) {
+        console.error('Failed to spawn C++ process:', err);
+        resolve({ success: false, error: 'SPAWN_FAILED' });
+      }
     });
   }
 }

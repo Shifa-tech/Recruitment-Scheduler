@@ -38,9 +38,22 @@ export class InterviewService {
       order: { round: 'ASC' },
     });
   }
-  async processCandidateForm(requiredSkill: string, round: InterviewRound) {
-    // Just pass the request to the C++ bridge
-    return this.schedulingService.findMatchesForCandidate(requiredSkill, round);
+  async processCandidateForm(skills: string[], round: InterviewRound, candidateId: string) {
+    // 1. Save the skills to the candidate's profile
+    await this.userService.updateCandidateSkills(candidateId, skills);
+
+    // 2. Loop through the skills to find the first available match
+    for (const skill of skills) {
+      const result = await this.schedulingService.findMatchesForCandidate(skills, round);
+      
+      // If the C++ engine found a match for this skill, return it immediately
+      if (result.success && result.matches && result.matches.length > 0) {
+        return result;
+      }
+    }
+
+    // 3. If the loop finishes and no skills matched, return an error
+    return { success: false, error: "NO_MATCHES_FOUND_FOR_ANY_SKILL" };
   }
 
   async confirmSlot(
@@ -112,4 +125,23 @@ export class InterviewService {
       interview,
     };
   }
+
+    // 1. Get ALL interviews (for Coordinators)
+  async getAllInterviews() {
+    return this.interviewRepo.find({
+      relations: { candidate: true, interviewer: true, room: true },
+      order: { startTime: 'ASC' },
+    });
+  }
+
+  // 2. Cancel an interview (from Coordinator side)
+  async coordinatorCancelInterview(interviewId: string) {
+    const interview = await this.interviewRepo.findOne({ where: { id: interviewId } });
+    if (!interview) throw new NotFoundException('Interview not found');
+
+    interview.status = InterviewStatus.CANCELLED;
+    await this.interviewRepo.save(interview);
+    return { success: true, message: 'Interview cancelled by Coordinator' };
+  }
+  
 }

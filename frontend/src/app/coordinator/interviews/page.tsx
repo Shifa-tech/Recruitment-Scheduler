@@ -1,29 +1,161 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { fetchWithAuth } from "../../lib/api";
+import { auth } from "@/app/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
-type InterviewStatus = "Scheduled" | "Completed" | "Cancelled" | "Needs Assignment";
-type Interview = { id:number; candidate:string; registration:string; drive:string; round:string; date:string; start:string; end:string; interviewer:string; room:string; status:InterviewStatus };
-const initial:Interview[]=[
- {id:1,candidate:"Aarav Sharma",registration:"2023CS101",drive:"Software Engineer 2026",round:"Technical Interview",date:"2026-10-30",start:"10:00",end:"10:45",interviewer:"Dr. Mehta",room:"Room 01",status:"Scheduled"},
- {id:2,candidate:"Priya Verma",registration:"2023IT042",drive:"Frontend Developer 2026",round:"Coding Round",date:"2026-10-30",start:"11:00",end:"11:45",interviewer:"Unassigned",room:"Unassigned",status:"Needs Assignment"},
- {id:3,candidate:"Rohan Gupta",registration:"2023CS115",drive:"Software Engineer 2026",round:"HR Interview",date:"2026-10-26",start:"14:00",end:"14:30",interviewer:"Ms. Kapoor",room:"Room 03",status:"Completed"},
- {id:4,candidate:"Maya Singh",registration:"2023CS128",drive:"Backend Developer 2026",round:"Technical Interview",date:"2026-10-31",start:"09:00",end:"09:45",interviewer:"Mr. Khan",room:"Room 02",status:"Scheduled"},
-];
-const inputClass="border border-[#D5AE65]/30 bg-white px-3 py-2.5 text-sm text-[#29241D] outline-none focus:border-[#9D3F2A]";
-export default function CoordinatorInterviewsPage(){
- const [items,setItems]=useState(initial);const [search,setSearch]=useState("");const [status,setStatus]=useState("All");const [drive,setDrive]=useState("All");const [selected,setSelected]=useState<number|null>(null);const [newDate,setNewDate]=useState("");const [newStart,setNewStart]=useState("10:00");const [newEnd,setNewEnd]=useState("10:45");const [message,setMessage]=useState("");
- const visible=useMemo(()=>items.filter(x=>`${x.candidate} ${x.registration} ${x.drive} ${x.round} ${x.interviewer} ${x.room}`.toLowerCase().includes(search.toLowerCase())&&(status==="All"||x.status===status)&&(drive==="All"||x.drive===drive)),[items,search,status,drive]);
- const active=items.find(x=>x.id===selected);
- const statusClass=(s:InterviewStatus)=>s==="Scheduled"?"border-[#52734D]/30 bg-[#E7EDDF] text-[#46633F]":s==="Completed"?"border-[#D5AE65]/40 bg-[#F7EBD0] text-[#896522]":s==="Cancelled"?"border-[#9D3F2A]/30 bg-[#F4DFD5] text-[#9D3F2A]":"border-[#B58A42]/30 bg-[#F7EBD0] text-[#896522]";
- function cancel(id:number){const item=items.find(x=>x.id===id);if(!item||item.status==="Completed"||item.status==="Cancelled")return;if(!window.confirm(`Cancel ${item.candidate}'s ${item.round}?`))return;setItems(p=>p.map(x=>x.id===id?{...x,status:"Cancelled"}:x));setMessage("Interview cancelled in demo state.");setSelected(null);}
- function reschedule(e:React.FormEvent<HTMLFormElement>){e.preventDefault();setMessage("");if(!active)return;if(!newDate||newStart>=newEnd){setMessage("Choose a date and an end time later than the start time.");return;}const conflict=items.some(x=>x.id!==active.id&&x.status==="Scheduled"&&x.date===newDate&&newStart<x.end&&x.start<newEnd&&((active.interviewer!=="Unassigned"&&x.interviewer===active.interviewer)||(active.room!=="Unassigned"&&x.room===active.room)));if(conflict){setMessage("A scheduled session appears to overlap this interviewer or room. Review the scheduling engine before saving.");return;}setItems(p=>p.map(x=>x.id===active.id?{...x,date:newDate,start:newStart,end:newEnd,status:x.interviewer==="Unassigned"||x.room==="Unassigned"?"Needs Assignment":"Scheduled"}:x));setMessage("Rescheduled in demo state.");setSelected(null);}
- return <DashboardLayout role="Coordinator"><main className="min-h-screen bg-[#171613] p-4 text-[#F0E5CE] sm:p-8"><div className="mx-auto max-w-7xl space-y-7"><header className="border-b border-[#D5AE65]/25 pb-6"><Link href="/coordinator" className="text-sm text-[#D5AE65] hover:underline">← Command Chamber</Link><p className="mt-4 text-[10px] uppercase tracking-[.3em] text-[#D5AE65]">Recruitment Operations</p><h1 className="mt-2 font-serif text-3xl sm:text-4xl">All Interviews</h1><p className="mt-2 max-w-3xl text-sm leading-6 text-[#B9B09F]">Review interview sessions across recruitment drives. Inspect assignments, identify sessions that need attention, and manage cancellations or rescheduling.</p><div className="mt-5 flex flex-wrap gap-3"><Link href="/coordinator/scheduling" className="bg-[#D5AE65] px-4 py-2.5 text-sm font-semibold text-[#171613] hover:bg-[#E8CC91]">Open Scheduling Engine →</Link><Link href="/coordinator/drives" className="border border-[#D5AE65]/40 px-4 py-2.5 text-sm hover:border-[#D5AE65] hover:text-[#D5AE65]">View Recruitment Drives</Link></div></header>
- <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[{label:"Total sessions",value:items.length},{label:"Scheduled",value:items.filter(x=>x.status==="Scheduled").length},{label:"Need assignment",value:items.filter(x=>x.status==="Needs Assignment").length},{label:"Cancelled",value:items.filter(x=>x.status==="Cancelled").length}].map(s=><article key={s.label} className="border border-[#D5AE65]/25 bg-[#FFFAF0] p-5 text-[#29241D]"><p className="text-sm text-[#756651]">{s.label}</p><p className="mt-3 font-serif text-3xl">{s.value}</p></article>)}</section>
- {message&&<div className="border border-[#D5AE65]/30 bg-[#211F1A] p-4 text-sm text-[#D5AE65]">{message}</div>}
- <section className="border border-[#D5AE65]/25 bg-[#FFFAF0] text-[#29241D]"><div className="grid gap-3 border-b border-[#E6D8BE] p-5 md:grid-cols-[1fr_190px_240px]"><input className={inputClass} value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search candidate, round, room..." aria-label="Search interviews"/><select className={inputClass} value={status} onChange={e=>setStatus(e.target.value)} aria-label="Filter by status"><option>All</option><option>Scheduled</option><option>Completed</option><option>Cancelled</option><option>Needs Assignment</option></select><select className={inputClass} value={drive} onChange={e=>setDrive(e.target.value)} aria-label="Filter by drive"><option>All</option>{Array.from(new Set(items.map(x=>x.drive))).map(x=><option key={x}>{x}</option>)}</select></div><div className="border-b border-[#E6D8BE] px-5 py-3 text-sm text-[#756651]">Showing {visible.length} of {items.length} interview sessions</div><div className="overflow-x-auto"><table className="w-full min-w-[1000px] text-left text-sm"><thead className="bg-[#E8DCC5]/60 text-[10px] uppercase tracking-wider text-[#756651]"><tr>{["Candidate","Drive / Round","Date & Time","Interviewer","Room","Status","Actions"].map(x=><th key={x} className="px-4 py-4 font-medium">{x}</th>)}</tr></thead><tbody>{visible.map(x=><tr key={x.id} className="border-t border-[#E6D8BE] hover:bg-[#F5ECD9]"><td className="px-4 py-4"><p className="font-medium">{x.candidate}</p><p className="mt-1 text-xs text-[#756651]">{x.registration}</p></td><td className="px-4 py-4"><p>{x.drive}</p><p className="mt-1 text-xs text-[#756651]">{x.round}</p></td><td className="px-4 py-4 text-[#756651]">{x.date}<br/>{x.start}–{x.end}</td><td className="px-4 py-4">{x.interviewer}</td><td className="px-4 py-4">{x.room}</td><td className="px-4 py-4"><span className={`whitespace-nowrap border px-2 py-1 text-xs ${statusClass(x.status)}`}>{x.status}</span></td><td className="px-4 py-4"><div className="flex gap-3 whitespace-nowrap"><button onClick={()=>{setSelected(x.id);setNewDate(x.date);setNewStart(x.start);setNewEnd(x.end);setMessage("")}} className="text-xs font-semibold text-[#9D3F2A] hover:underline" disabled={x.status==="Completed"||x.status==="Cancelled"}>Reschedule</button><button onClick={()=>cancel(x.id)} className="text-xs font-semibold text-[#9D3F2A] hover:underline" disabled={x.status==="Completed"||x.status==="Cancelled"}>Cancel</button></div></td></tr>)}{visible.length===0&&<tr><td colSpan={7} className="p-10 text-center text-[#756651]">No interviews match these filters.</td></tr>}</tbody></table></div></section>
- {active&&<section className="border border-[#D5AE65]/30 bg-[#211F1A] p-5 sm:p-6"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-[10px] uppercase tracking-[.2em] text-[#D5AE65]">Edit session timing</p><h2 className="mt-2 font-serif text-2xl">{active.candidate}</h2><p className="mt-1 text-sm text-[#B9B09F]">{active.round} · {active.drive}</p></div><button onClick={()=>setSelected(null)} className="text-sm text-[#D5AE65] hover:underline">Close</button></div><form onSubmit={reschedule} className="mt-5 grid gap-4 sm:grid-cols-3"><div><label className="mb-2 block text-sm text-[#B9B09F]">New date</label><input className="w-full border border-[#D5AE65]/30 bg-[#171613] px-3 py-2.5 text-sm text-[#F0E5CE]" type="date" value={newDate} onChange={e=>setNewDate(e.target.value)} required/></div><div><label className="mb-2 block text-sm text-[#B9B09F]">Start time</label><input className="w-full border border-[#D5AE65]/30 bg-[#171613] px-3 py-2.5 text-sm text-[#F0E5CE]" type="time" value={newStart} onChange={e=>setNewStart(e.target.value)} required/></div><div><label className="mb-2 block text-sm text-[#B9B09F]">End time</label><input className="w-full border border-[#D5AE65]/30 bg-[#171613] px-3 py-2.5 text-sm text-[#F0E5CE]" type="time" value={newEnd} onChange={e=>setNewEnd(e.target.value)} required/></div><div className="sm:col-span-3"><button className="bg-[#D5AE65] px-4 py-2.5 text-sm font-semibold text-[#171613] hover:bg-[#E8CC91]" type="submit">Save New Time</button></div></form></section>}
- <p className="border-t border-[#D5AE65]/20 pt-4 text-xs text-[#8B7D68]">Demo mode: cancellation and rescheduling affect only this page. Production actions must be permission-checked and validated against candidate, interviewer, and room availability on the backend.</p></div></main></DashboardLayout>;
+type Interview = {
+  id: string;
+  round: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  candidate: { name: string; email: string };
+  interviewer: { name: string };
+  room: { roomNo: string } | null;
+};
+
+export default function CoordinatorInterviewsPage() {
+  const [interviews, setInterviews] = useState<Interview[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+
+  async function loadInterviews() {
+    try {
+      const res = await fetchWithAuth("/interviews/all");
+      if (res.ok) {
+        const data = await res.json();
+        setInterviews(data);
+      }
+    } catch (error) {
+      console.error("Failed to load interviews", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loadInterviews();
+      } else {
+        setLoading(false);
+        setMessage("Please log in to view this page.");
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  async function cancelInterview(id: string) {
+    if (!window.confirm("Are you sure you want to cancel this interview?")) return;
+    
+    try {
+      const res = await fetchWithAuth(`/interviews/${id}/coordinator-cancel`, {
+        method: "PATCH",
+      });
+      if (res.ok) {
+        setMessage("Interview cancelled successfully.");
+        loadInterviews(); // Refresh list
+      } else {
+        setMessage("Failed to cancel interview.");
+      }
+    } catch (error) {
+      setMessage("Error cancelling interview.");
+    }
+  }
+
+  const formatTime = (isoString: string) => {
+    return new Date(isoString).toLocaleString("en-IN", {
+      month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
+    });
+  };
+
+  return (
+    <DashboardLayout role="Coordinator">
+      <div className="min-h-screen bg-[#171613] p-4 text-[#F0E5CE] sm:p-8">
+        <div className="mx-auto max-w-7xl space-y-7">
+          
+          <header className="border-b border-[#D5AE65]/25 pb-6">
+            <Link href="/coordinator" className="text-sm text-[#D5AE65] hover:underline">
+              ← Command Chamber
+            </Link>
+            <p className="mt-4 text-[10px] uppercase tracking-[.3em] text-[#D5AE65]">
+              Recruitment Operations
+            </p>
+            <h1 className="mt-2 font-serif text-3xl sm:text-4xl">All Interviews</h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[#B9B09F]">
+              Monitor all scheduled interviews across the platform. Manage cancellations here.
+            </p>
+          </header>
+
+          {message && (
+            <div className="border border-[#D5AE65]/30 bg-[#211F1A] p-4 text-sm text-[#D5AE65]">
+              {message}
+            </div>
+          )}
+
+          <section className="border border-[#D5AE65]/25 bg-[#FFFAF0] text-[#29241D]">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[900px] text-left text-sm">
+                <thead className="bg-[#E8DCC5]/60 text-[10px] uppercase tracking-wider text-[#756651]">
+                  <tr>
+                    <th className="px-5 py-4 font-medium">Candidate</th>
+                    <th className="px-5 py-4 font-medium">Interviewer</th>
+                    <th className="px-5 py-4 font-medium">Round</th>
+                    <th className="px-5 py-4 font-medium">Time</th>
+                    <th className="px-5 py-4 font-medium">Room</th>
+                    <th className="px-5 py-4 font-medium">Status</th>
+                    <th className="px-5 py-4 font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr><td colSpan={7} className="p-5 text-center text-[#756651]">Loading...</td></tr>
+                  ) : interviews.length === 0 ? (
+                    <tr><td colSpan={7} className="p-5 text-center text-[#756651]">No interviews scheduled yet.</td></tr>
+                  ) : (
+                    interviews.map((x) => (
+                      <tr key={x.id} className="border-t border-[#E6D8BE] hover:bg-[#F5ECD9]">
+                        <td className="px-5 py-4">
+                          <p className="font-medium">{x.candidate.name}</p>
+                          <p className="text-xs text-[#756651]">{x.candidate.email}</p>
+                        </td>
+                        <td className="px-5 py-4">{x.interviewer.name}</td>
+                        <td className="px-5 py-4">{x.round}</td>
+                        <td className="px-5 py-4 text-[#756651]">{formatTime(x.startTime)}</td>
+                        <td className="px-5 py-4">{x.room?.roomNo || 'TBD'}</td>
+                        <td className="px-5 py-4">
+                          <span className={`whitespace-nowrap border px-2 py-1 text-xs ${
+                            x.status === "SCHEDULED" ? "border-green-700/50 text-green-700 bg-green-50" : 
+                            x.status === "CANCELLED" ? "border-red-700/50 text-red-700 bg-red-50" : 
+                            "border-[#B58A42]/30 text-[#896522] bg-[#F7EBD0]"
+                          }`}>
+                            {x.status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          {x.status === "SCHEDULED" && (
+                            <button 
+                              onClick={() => cancelInterview(x.id)}
+                              className="text-xs font-semibold text-[#9D3F2A] hover:underline"
+                            >
+                              Cancel
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
 }

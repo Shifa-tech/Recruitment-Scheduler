@@ -40,4 +40,9 @@ export class UserService {
       where: { role: Role.INTERVIEWER },
     });
   }
+
+  async updateCandidateSkills(userId: string, skills: string[]) {
+    await this.userRepository.update(userId, { skills });
+    return this.userRepository.findOne({ where: { id: userId } });
+  }
 }
